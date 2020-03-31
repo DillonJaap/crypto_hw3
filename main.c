@@ -28,12 +28,12 @@ matrix* init_sbox()
 	return init_matrix(16, 16, data);
 }
 
-void initial_round(matrix* block, matrix* key)
+void add_round_key(matrix* block, matrix* key)
 {
 	// Initial round, xor all the entries in the block and key
-	for (uint8_t i = 0; i < block->cols; i++)
+	for (uint8_t i = 0; i < block->rows; i++)
 	{
-		for (uint8_t j = 0; j < block->rows; j++)
+		for (uint8_t j = 0; j < block->cols; j++)
 			block->t[i][j] ^= key->t[i][j];
 	}
 
@@ -101,14 +101,23 @@ int main(int argc, char** argv)
 		0x01, 0x01, 0x02, 0x03,
 		0x03, 0x01, 0x01, 0x02
 	};
+	
+	uint8_t rcon_data[] = {
+		0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+		
 		 
 	// init block and key matricies
 	matrix* block  = init_matrix(4, 4, block_data);
 	matrix* key    = init_matrix(4, 4, key_data);
+	
+	// other matricies needed for AES
 	matrix* mixcol = init_matrix(4, 4, mixcol_data);
-
-	// get sbox
-	matrix* sbox  = init_sbox();
+	matrix* rcon   = init_matrix(4, 9, rcon_data);
+	matrix* sbox   = init_sbox(); // get sbox
 
 	printf("block:\n");
 	print_matrix(block);
@@ -118,7 +127,7 @@ int main(int argc, char** argv)
 	print_matrix(sbox);
 
 	printf("\ninitial round:\n");
-	initial_round(block, key);
+	add_round_key(block, key);
 	print_matrix(block);
 
 	printf("\nsubbytes:\n");
