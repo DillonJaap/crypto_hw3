@@ -82,9 +82,13 @@ void shift_rows(matrix* block)
 	rotate_row(block, 3, 3);
 }
 
-void mix_cols()
+void mix_cols(matrix* block, matrix* mixcol)
 {
-	return
+	matrix* temp = init_matrix(1, block->rows, NULL);
+	get_col(temp, block, 0);
+	mult_matrix(mixcol, temp);
+
+	return;
 };
 
 int main(int argc, char** argv)
