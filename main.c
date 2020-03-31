@@ -45,13 +45,12 @@ void sub_bytes(matrix* block, matrix* sbox)
 	uint8_t col = 0;
 	uint8_t row = 0;
 
-	for (uint8_t i = 0; i < block->cols; i++)
+	for (uint8_t i = 0; i < block->rows; i++)
 	{
-		for (uint8_t j = 0; j < block->rows; j++)
+		for (uint8_t j = 0; j < block->cols; j++)
 		{
 			col = block->t[i][j] & 0x0F;
 			row = (block->t[i][j] & 0xF0) >> 4;
-			printf("col: %x, row: %x, val: %2.2x\n", col, row,  (uint8_t)sbox->t[row][col]);
 			block->t[i][j] = sbox->t[row][col];
 		}
 	}
@@ -68,7 +67,7 @@ void shift_rows(matrix* block)
 
 void mix_cols(matrix* block, matrix* mixcol)
 {
-	matrix* temp = init_matrix(1, block->rows, NULL);
+	matrix* temp = init_matrix(block->rows, 1, NULL);
 	
 	for (uint8_t i; i < block->cols; i++)
 	{
@@ -79,13 +78,56 @@ void mix_cols(matrix* block, matrix* mixcol)
 	free(temp);
 }
 
+void get_keys(matrix* keys[], matrix* rcon, matrix* sbox)
+{
+	matrix* temp1 = init_matrix(keys[0]->rows, 1, NULL);
+	matrix* temp2 = init_matrix(keys[0]->rows, 1, NULL);
+	for (int i = 1; i < 11; i++)
+	{
+		// w1
+		get_col(temp1, keys[i-1], 3);
+		rotate_col(temp1, 0, 1);
+		sub_bytes(temp1, sbox);
+
+		get_col(temp2, keys[i-1], 0);
+		add_round_key(temp1, temp2);
+		get_col(temp2, rcon, i-1);
+		add_round_key(temp1, temp2);
+
+		set_col(keys[i], temp1, 0);
+
+		// w2
+		get_col(temp1, keys[i-1], 1);
+		get_col(temp2, keys[i], 0);
+
+		add_round_key(temp1, temp2);
+		set_col(keys[i], temp1, 1);
+
+		// w3
+		get_col(temp1, keys[i-1], 2);
+		get_col(temp2, keys[i], 1);
+
+		add_round_key(temp1, temp2);
+		set_col(keys[i], temp1, 2);
+
+		// w4
+		get_col(temp1, keys[i-1], 3);
+		get_col(temp2, keys[i], 2);
+
+		add_round_key(temp1, temp2);
+		set_col(keys[i], temp1, 3);
+	}
+	free(temp1);
+	free(temp2);
+}
+
 int main(int argc, char** argv)
 {
 	uint8_t block_data[] = {
-		0xaa, 2, 3, 4,
-		1, 2, 3, 8,
-		1, 0, 3, 4,
-		1, 2, 3, 4
+		0xd4, 0xe0, 0xb8, 0x1e,
+		0xbf, 0xb4, 0x41, 0x27,
+		0x5d, 0x52, 0x11, 0x98,
+		0x30, 0xae, 0xf1, 0xe5
 	};
 
 	uint8_t key_data[] = {
@@ -103,46 +145,83 @@ int main(int argc, char** argv)
 	};
 	
 	uint8_t rcon_data[] = {
-		0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
+
+	matrix* keys[11];
+	keys[0] = init_matrix(4, 4, key_data);
+	for (int i = 1; i < 11; i++) 
+		keys[i] = init_matrix(4, 4, NULL);
+
 		
 		 
 	// init block and key matricies
 	matrix* block  = init_matrix(4, 4, block_data);
-	matrix* key    = init_matrix(4, 4, key_data);
 	
 	// other matricies needed for AES
 	matrix* mixcol = init_matrix(4, 4, mixcol_data);
-	matrix* rcon   = init_matrix(4, 9, rcon_data);
+	matrix* rcon   = init_matrix(4, 10, rcon_data);
 	matrix* sbox   = init_sbox(); // get sbox
+
+	get_keys(keys, rcon, sbox);
+
 
 	printf("block:\n");
 	print_matrix(block);
-	printf("\nkey:\n");
-	print_matrix(key);
-	printf("\nsbox:\n");
-	print_matrix(sbox);
+	printf("\ncypther key:\n");
+	print_matrix(keys[0]);
 
+	for (int i = 1; i < 11; i++) 
+	{
+		printf("\nround key %d:\n", i);
+		print_matrix(keys[i]);
+	}
+
+	// initial round
 	printf("\ninitial round:\n");
-	add_round_key(block, key);
+	add_round_key(block, keys[0]);
 	print_matrix(block);
 
+	// 9 main rounds
+	for (int i = 1; i < 10; i++) 
+	{
+		printf("\nsubbytes:\n");
+		sub_bytes(block, sbox);
+		print_matrix(block);
+
+		printf("\nshift rows:\n");
+		shift_rows(block);
+		print_matrix(block);
+		
+		printf("\nmix cols:\n");
+		mix_cols(block, mixcol);
+		print_matrix(block);
+
+		printf("\naddroundkey:\n");
+		add_round_key(block, keys[i]);
+		print_matrix(block);
+	}
+
+	// 10th round
 	printf("\nsubbytes:\n");
 	sub_bytes(block, sbox);
 	print_matrix(block);
 
-	printf("\nsubbytes:\n");
+	printf("\nshift rows:\n");
 	shift_rows(block);
 	print_matrix(block);
 	
-	printf("\nmix cols:\n");
-	mix_cols(block, mixcol);
+	printf("\naddroundkey:\n");
+	add_round_key(block, keys[10]);
 	print_matrix(block);
 
-	printf("result: %x\n", mult(0xca, 0x53));
+	printf("\ncypher block:\n");
+	print_matrix(block);
+
+	//printf("result: %x\n", mult(0xca, 0x53));
 	return 0;
 }
 

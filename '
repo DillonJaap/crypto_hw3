@@ -41,7 +41,9 @@ void set_matrix(matrix* m, uint8_t* data)
 	for (uint8_t i = 0; i < m->rows; i++)
 	{
 		for (uint8_t j = 0; j < m->cols; j++)
-			m->t[i][j] = data ? *(data + ((i * m->cols) + j)) : 0;
+		{
+			m->t[i][j] = data ? *(data + ((i * m->rows) + j)) : 0;
+		}
 	}
 }
 
@@ -51,7 +53,7 @@ void print_matrix(matrix* m)
 	{
 		printf("|");
 		for (uint8_t j = 0; j < m->cols; j++)
-			printf("%#04hhx ", (unsigned)m->t[i][j]);
+			printf("%02x ", m->t[i][j]);
 		printf("|\n");
 	}
 	printf("\n");
@@ -77,7 +79,6 @@ uint8_t mult(uint8_t a, uint8_t b)
 		b >>= 1;
 	}
 
-	//printf("(result: %x)", result);
 	return result;
 }
 
@@ -86,22 +87,17 @@ uint8_t sum_Lrow_Rcol(matrix* L, matrix* R, uint8_t Lrow, uint8_t Rcol)
 {
 	uint8_t total = 0;
 	for (uint8_t i = 0; i < L->rows; i++)
-	{
-		total ^= mult(L->t[Lrow][i], R->t[i][Rcol]);
-		//printf(" %#04hhx*%#04hhx +",L->t[Lrow][i], R->t[i][Rcol]);
-	}
-	//printf("\b= %#04hhx\n", total);
+		total += mult(L->t[Lrow][i], R->t[i][Rcol]);
 	return total;
 }
 
 void mult_matrix(matrix* dest, matrix* L, matrix* R)
 {
-	for (uint8_t i = 0; i < L->rows; i++)
+	set_matrix(dest, NULL);
+	for (uint8_t i = 0; i < R->rows; i++)
 	{
-		for (uint8_t j = 0; j < R->cols; j++)
-		{
+		for (uint8_t j = 0; j < L->cols; j++)
 			dest->t[i][j] = sum_Lrow_Rcol(L, R, i, j);
-		}
 	}
 }	
 
