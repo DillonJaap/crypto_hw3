@@ -1,0 +1,27 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/a3c87ab5/
+cols	matrix.c	/^	int16_t  cols;$/;"	m	struct:matrix	typeref:typename:int16_t	file:
+cols	matrix.h	/^	int16_t  cols;$/;"	m	struct:matrix	typeref:typename:int16_t
+init_matrix	matrix.c	/^matrix* init_matrix(uint16_t rows, uint16_t cols, uint8_t* data)$/;"	f	typeref:typename:matrix *
+init_sbox	main.c	/^matrix* init_sbox()$/;"	f	typeref:typename:matrix *
+initial_round	main.c	/^void initial_round(matrix* block, matrix* key)$/;"	f	typeref:typename:void
+main	main.c	/^int main(int argc, char** argv)$/;"	f	typeref:typename:int
+matrix	matrix.c	/^typedef struct matrix$/;"	s	file:
+matrix	matrix.c	/^} matrix;$/;"	t	typeref:struct:matrix	file:
+matrix	matrix.h	/^typedef struct matrix$/;"	s
+matrix	matrix.h	/^} matrix;$/;"	t	typeref:struct:matrix
+mult_matrix	matrix.c	/^void mult_matrix(matrix* dest, matrix* L, matrix* R)$/;"	f	typeref:typename:void
+print_matrix	matrix.c	/^void print_matrix(matrix* m)$/;"	f	typeref:typename:void
+rows	matrix.c	/^	int16_t  rows;$/;"	m	struct:matrix	typeref:typename:int16_t	file:
+rows	matrix.h	/^	int16_t  rows;$/;"	m	struct:matrix	typeref:typename:int16_t
+set_matrix	matrix.c	/^void set_matrix(matrix* m, uint8_t* data)$/;"	f	typeref:typename:void
+sub_bytes	main.c	/^void sub_bytes(matrix* block, matrix* sbox)$/;"	f	typeref:typename:void
+sum_Lcol_Rrow	matrix.c	/^int sum_Lcol_Rrow(matrix* L, matrix* R, uint16_t Lcol, uint16_t Rrow)$/;"	f	typeref:typename:int
+t	matrix.c	/^	int8_t** t;$/;"	m	struct:matrix	typeref:typename:int8_t **	file:
+t	matrix.h	/^	int8_t** t;$/;"	m	struct:matrix	typeref:typename:int8_t **
