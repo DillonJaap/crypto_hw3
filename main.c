@@ -57,22 +57,6 @@ void sub_bytes(matrix* block, matrix* sbox)
 	}
 }
 
-void rotate_row(matrix* m, uint8_t row, uint8_t n)
-{
-	uint8_t temp = 0;
-	uint8_t index = 0;
-
-	for (uint8_t i = 0; i < n; i++)
-	{
-		temp = m->t[row][0];
-
-		for (uint8_t j = 0; j < m->cols - 1; j++)
-			m->t[row][j] = m->t[row][j+1];
-
-		m->t[row][m->cols - 1] = temp;
-	}
-
-}
 
 void shift_rows(matrix* block)
 {
