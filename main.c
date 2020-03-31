@@ -68,14 +68,16 @@ void shift_rows(matrix* block)
 void mix_cols(matrix* block, matrix* mixcol)
 {
 	matrix* temp = init_matrix(block->rows, 1, NULL);
+	matrix* temp2 = init_matrix(block->rows, 1, NULL);
 	
 	for (uint8_t i; i < block->cols; i++)
 	{
 		get_col(temp, block, i);
-		mult_matrix(temp, mixcol, temp);
-		set_col(block, temp, i);
+		mult_matrix(temp2, mixcol, temp);
+		set_col(block, temp2, i);
 	}
 	free(temp);
+	free(temp2);
 }
 
 void get_keys(matrix* keys[], matrix* rcon, matrix* sbox)
@@ -199,7 +201,6 @@ int main(int argc, char** argv)
 		printf("\nmix cols:\n");
 		mix_cols(block, mixcol);
 		print_matrix(block);
-
 		printf("\naddroundkey:\n");
 		add_round_key(block, keys[i]);
 		print_matrix(block);
