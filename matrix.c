@@ -5,12 +5,12 @@
 
 typedef struct matrix
 {
-	int16_t  rows;
-	int16_t  cols;
+	uint8_t  rows;
+	uint8_t  cols;
 	uint8_t** t;
 } matrix;
 
-matrix* init_matrix(uint16_t rows, uint16_t cols, uint8_t* data)
+matrix* init_matrix(uint8_t rows, uint8_t cols, uint8_t* data)
 {
 	// malloc matrix
 	matrix* m = malloc(sizeof(m));
@@ -20,13 +20,13 @@ matrix* init_matrix(uint16_t rows, uint16_t cols, uint8_t* data)
 	// malloc actual table of matrix
 	
 	m->t = malloc(sizeof(uint8_t*) * rows);
-	for (uint16_t i = 0; i < m->rows; i++)
+	for (uint8_t i = 0; i < m->rows; i++)
 		m->t[i] = malloc(sizeof(uint8_t) * cols);
 
 	// set table to supplied data
-	for (int16_t i = 0; i < m->rows; i++)
+	for (uint8_t i = 0; i < m->rows; i++)
 	{
-		for (int16_t j = 0; j < m->cols; j++)
+		for (uint8_t j = 0; j < m->cols; j++)
 			m->t[i][j] = data ? *(data + ((i * m->rows) + j)) : 0;
 	}
 
@@ -35,9 +35,9 @@ matrix* init_matrix(uint16_t rows, uint16_t cols, uint8_t* data)
 
 void set_matrix(matrix* m, uint8_t* data)
 {
-	for (int16_t i = 0; i < m->rows; i++)
+	for (uint8_t i = 0; i < m->rows; i++)
 	{
-		for (int16_t j = 0; j < m->cols; j++)
+		for (uint8_t j = 0; j < m->cols; j++)
 		{
 			m->t[i][j] = data ? *(data + ((i * m->rows) + j)) : 0;
 		}
@@ -56,22 +56,53 @@ void print_matrix(matrix* m)
 
 }
 
-int sum_Lrow_Rcol(matrix* L, matrix* R, uint16_t Lrow, uint16_t Rcol)
+uint8_t mult(uint8_t a, uint8_t b)
+{
+	uint8_t result = 0;
+
+	//  Rusian peasent algo for mult
+	//  loop until either a or b is 0
+	while (a && b)
+	{
+		// if b is odd add a to the sum
+		if (b & 1)
+			result ^= a;
+
+		if (a & 0x80) // a is going to overflow when shifted, must mod
+			a = ((a << 1) ^ 0x11b); // 0x11b is the prime polynomial
+		else
+			a <<= 1;
+		b >>= 1;
+	}
+
+	return result;
+}
+
+
+int sum_Lrow_Rcol(matrix* L, matrix* R, uint8_t Lrow, uint8_t Rcol)
 {
 	int total = 0;
-	for (int i = 0; i < L->rows; i++)
-		total += L->t[Lrow][i] * R->t[i][Rcol];
+	for (uint8_t i = 0; i < L->rows; i++)
+		total += mult(L->t[Lrow][i], R->t[i][Rcol]);
 	return total;
 }
 
 void mult_matrix(matrix* dest, matrix* L, matrix* R)
 {
 	set_matrix(dest, NULL);
-	for (uint16_t i = 0; i < R->cols; i++)
+	for (uint8_t i = 0; i < R->cols; i++)
 	{
-		for (uint16_t j = 0; j < L->rows; j++)
+		for (uint8_t j = 0; j < L->rows; j++)
 		{
 			dest->t[i][j] = sum_Lrow_Rcol(L, R, i, j);
 		}
 	}
 }	
+
+void get_col(matrix* dest, matrix* src, uint8_t col)
+{
+	uint8_t data[src->rows]; 
+	for
+		src->[col][0]
+	set_matrix(	
+}

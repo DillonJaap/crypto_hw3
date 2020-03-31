@@ -31,9 +31,9 @@ matrix* init_sbox()
 void initial_round(matrix* block, matrix* key)
 {
 	// Initial round, xor all the entries in the block and key
-	for (uint16_t i = 0; i < block->cols; i++)
+	for (uint8_t i = 0; i < block->cols; i++)
 	{
-		for (uint16_t j = 0; j < block->rows; j++)
+		for (uint8_t j = 0; j < block->rows; j++)
 			block->t[i][j] ^= key->t[i][j];
 	}
 
@@ -42,12 +42,12 @@ void initial_round(matrix* block, matrix* key)
 
 void sub_bytes(matrix* block, matrix* sbox)
 {
-	int col = 0;
-	int row = 0;
+	uint8_t col = 0;
+	uint8_t row = 0;
 
-	for (uint16_t i = 0; i < block->cols; i++)
+	for (uint8_t i = 0; i < block->cols; i++)
 	{
-		for (uint16_t j = 0; j < block->rows; j++)
+		for (uint8_t j = 0; j < block->rows; j++)
 		{
 			col = block->t[i][j] & 0x0F;
 			row = (block->t[i][j] & 0xF0) >> 4;
@@ -57,59 +57,21 @@ void sub_bytes(matrix* block, matrix* sbox)
 	}
 }
 
-void rotate_row(matrix* m, uint16_t row, uint16_t n)
+void rotate_row(matrix* m, uint8_t row, uint8_t n)
 {
 	uint8_t temp = 0;
-	uint16_t index = 0;
+	uint8_t index = 0;
 
-	for (int i = 0; i < n; i++)
+	for (uint8_t i = 0; i < n; i++)
 	{
 		temp = m->t[row][0];
 
-		for (int j = 0; j < m->cols - 1; j++)
+		for (uint8_t j = 0; j < m->cols - 1; j++)
 			m->t[row][j] = m->t[row][j+1];
 
 		m->t[row][m->cols - 1] = temp;
 	}
 
-}
-
-uint8_t mult(uint16_t a, uint16_t b)
-{
-	int nums[100] = {0,0,0,0,0,0,0,0};
-	uint16_t result = 0;
-
-	// multiple numbers in Rijndael's Galois field
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			nums[i] += a & (1 << j) & ((b >> i) << j);
-		}
-		nums[i] = nums[i] << i;
-		printf("nums %x\n", nums[i]);
-	}
-
-	// xor to complete multiplication
-	for (int i = 0; i < 7; i++)
-		nums[i+1] ^= nums[i];
-
-	result = nums[7];
-
-	// find mod incase of overflow
-	// division in GF(2^8), prime polynomial = x^8 + x^4 + x^3 + x + 1
-	while ((result >> 8) == 1) 
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			nums[i] += a & (1 << j) & ((b >> i) << j);
-		}
-		nums[i] = nums[i] << i;
-		printf("nums %x\n", nums[i]);
-	}
-	
-	printf("result %x\n", result);
-	return result;
 }
 
 void shift_rows(matrix* block)
@@ -119,6 +81,11 @@ void shift_rows(matrix* block)
 	rotate_row(block, 2, 2);
 	rotate_row(block, 3, 3);
 }
+
+void mix_cols()
+{
+	return
+};
 
 int main(int argc, char** argv)
 {
@@ -135,10 +102,18 @@ int main(int argc, char** argv)
 		5, 2, 1, 0,
 		0, 8, 7, 1
 	};
+
+	uint8_t mixcol_data[] = {
+		0x02, 0x03, 0x01, 0x01,
+		0x01, 0x02, 0x03, 0x01,
+		0x01, 0x01, 0x02, 0x03,
+		0x03, 0x01, 0x01, 0x02
+	};
 		 
 	// init block and key matricies
-	matrix* block = init_matrix(4, 4, block_data);
-	matrix* key   = init_matrix(4, 4, key_data);
+	matrix* block  = init_matrix(4, 4, block_data);
+	matrix* key    = init_matrix(4, 4, key_data);
+	matrix* mixcol = init_matrix(4, 4, mixcol_data);
 
 	// get sbox
 	matrix* sbox  = init_sbox();
@@ -162,7 +137,7 @@ int main(int argc, char** argv)
 	shift_rows(block);
 	print_matrix(block);
 
-	mult(0x03, 0x02);	
+	printf("result: %x\n", mult(0xca, 0x53));
 	return 0;
 }
 
