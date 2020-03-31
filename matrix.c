@@ -102,7 +102,7 @@ void mult_matrix(matrix* dest, matrix* L, matrix* R)
 void get_col(matrix* dest, matrix* src, uint8_t col)
 {
 	uint8_t data[src->rows]; 
-	for
-		src->[col][0]
-	set_matrix(	
+	for (uint8_t i = 0; i < src->rows; i++)
+		data[i] = src->[col][i];
+	set_matrix(dest, data);
 }
