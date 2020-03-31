@@ -109,6 +109,12 @@ void get_col(matrix* dest, matrix* src, uint8_t col)
 {
 	uint8_t data[src->rows]; 
 	for (uint8_t i = 0; i < src->rows; i++)
-		data[i] = src->[col][i];
+		data[i] = src->t[i][col];
 	set_matrix(dest, data);
+}
+
+void set_col(matrix* dest, matrix* src, uint8_t col)
+{
+	for (uint8_t i = 0; i < dest->rows; i++)
+		dest->t[i][col] = src->t[i][0];
 }
