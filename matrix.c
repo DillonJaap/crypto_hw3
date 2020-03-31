@@ -118,3 +118,38 @@ void set_col(matrix* dest, matrix* src, uint8_t col)
 	for (uint8_t i = 0; i < dest->rows; i++)
 		dest->t[i][col] = src->t[i][0];
 }
+
+
+void rotate_row(matrix* m, uint8_t row, uint8_t n)
+{
+	uint8_t temp = 0;
+	uint8_t index = 0;
+
+	for (uint8_t i = 0; i < n; i++)
+	{
+		temp = m->t[row][0];
+
+		for (uint8_t j = 0; j < m->cols - 1; j++)
+			m->t[row][j] = m->t[row][j+1];
+
+		m->t[row][m->cols - 1] = temp;
+	}
+
+}
+
+void rotate_col(matrix* m, uint8_t col, uint8_t n)
+{
+	uint8_t temp = 0;
+	uint8_t index = 0;
+
+	for (uint8_t i = 0; i < n; i++)
+	{
+		temp = m->t[0][col];
+
+		for (uint8_t j = 0; j < m->rows - 1; j++)
+			m->t[j][col] = m->t[j+1][col];
+
+		m->t[m->rows - 1][col] = temp;
+	}
+
+}
