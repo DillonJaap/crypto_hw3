@@ -85,11 +85,15 @@ void shift_rows(matrix* block)
 void mix_cols(matrix* block, matrix* mixcol)
 {
 	matrix* temp = init_matrix(1, block->rows, NULL);
-	get_col(temp, block, 0);
-	mult_matrix(mixcol, temp);
-
-	return;
-};
+	
+	for (uint8_t i; i < block->cols; i++)
+	{
+		get_col(temp, block, i);
+		mult_matrix(temp, mixcol, temp);
+		set_col(block, temp, i);
+	}
+	free(temp);
+}
 
 int main(int argc, char** argv)
 {
@@ -139,6 +143,10 @@ int main(int argc, char** argv)
 
 	printf("\nsubbytes:\n");
 	shift_rows(block);
+	print_matrix(block);
+	
+	printf("\nmix cols:\n");
+	mix_cols(block, mixcol);
 	print_matrix(block);
 
 	printf("result: %x\n", mult(0xca, 0x53));
